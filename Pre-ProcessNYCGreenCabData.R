@@ -3,9 +3,12 @@
 #install.packages("ggmap")
 #library(ggmap)
 #install.packages("sp")
-#require("sp")
-#install.packages("maptools")
-#library(maptools)
+require("sp")
+install.packages("maptools")
+library(maptools)
+install.packages("plotrix")
+library(plotrix)
+library(ggplot2)
 #system.time(fread('green_tripdata_2016-02.csv', header = T, sep = ','))
 #data<-read.csv('https://s3.amazonaws.com/nyc-tlc/trip+data/green_tripdata_2016-02.csv', header = T, sep = ',')
 #Changing the pickup and drop-off time to POSIX
@@ -57,10 +60,19 @@ beforeMidNightTime="23:59:59"
 midnightTime="00:00:00"
 morningTime="04:00:00"
 #Breaking this data into Morning Slot
-#mornData<-subset(mainData,strftime(mainData$lpep_pickup_datetime, format="%H:%M:%S")>morningTime & strftime(mainData$lpep_pickup_datetime, format="%H:%M:%S")<=noonTime)
-
+mornData<-subset(mainData,strftime(mainData$lpep_pickup_datetime, format="%H:%M:%S")>morningTime & strftime(mainData$lpep_pickup_datetime, format="%H:%M:%S")<=noonTime)
+mornLocData<-table(unlist(mornData$Location))
+mornLocData<-sort(mornLocData,decreasing=TRUE)
+mornLocData<-head(mornLocData,10)
+mornDataFrame<-data.frame(mornLocData,names(mornLocData))
+locationPlot<-ggplot(data=mornDataFrame, aes(x=mornDataFrame$names.mornLocData, y=mornDataFrame$mornLocData,label=mornDataFrame$names.mornLocData)) +
+  +     geom_bar(stat="identity") +geom_text(fontface = "bold",position=position_jitter(width=0.5,height=10))
+mornBorroData<-table(unlist(mornData$County))
+mornBorroData<-sort(mornBorroData,decreasing=TRUE)
+mornBorroData<-head(mornBorroData,5)
+borroplot<-pie3D(mornBorroData, labels = names(mornBorroData), main = "Peak Hours Maximum Pickup Burroughs", explode=0.1, radius=.9, labelcex = 1.2,  start=0.7)
 #Breaking this data into Peak hours Morning Slot
-peakmornData<-subset(mainData,strftime(mainData$lpep_pickup_datetime, format="%H:%M:%S")>peakTimeStart & strftime(mainData$lpep_pickup_datetime, format="%H:%M:%S")<=peakTimeEnd)
+#peakmornData<-subset(mainData,strftime(mainData$lpep_pickup_datetime, format="%H:%M:%S")>peakTimeStart & strftime(mainData$lpep_pickup_datetime, format="%H:%M:%S")<=peakTimeEnd)
 
 #Breaking this data into Noon Slot
 #noonData<-subset(mainData,strftime(mainData$lpep_pickup_datetime, format="%H:%M:%S")>noonTime & strftime(mainData$lpep_pickup_datetime, format="%H:%M:%S")<=eveTime)
